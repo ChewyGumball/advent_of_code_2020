@@ -4,6 +4,7 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 use regex::Regex;
+use lazy_static::lazy_static;
 
 struct Policy {
     letter: char,
@@ -16,31 +17,50 @@ struct Password {
     value: String,
 }
 
-fn parse_number(value: &Option<regex::Match>) -> usize {
-
-    let value_string = value.unwrap().as_str();
-    return match value_string.parse() {
-        Err(why) => panic!("Couldn't parse '{}' into a number: {}", value_string, why),
-        Ok(number) => number
-    };
+lazy_static! {
+    static ref PASSWORD_REGEX: Regex = Regex::new(r"^(?P<min>\d+)-(?P<max>\d+) (?P<letter>.): (?P<value>.+)$").unwrap();
 }
 
-fn parse_password(line: &str) -> Password {
-    let regex: Regex = Regex::new(r"^(?P<min>\d+)-(?P<max>\d+) (?P<letter>.): (?P<value>.+)$").unwrap();
-    return regex.captures(line).map(|captures| Password {
+fn parse_number(value: &Option<regex::Match>) -> std::result::Result<usize, Box<dyn std::error::Error>> {
+    let value_string = value.ok_or("missing number capture")?.as_str();
+    let number: usize = value_string.parse()?;
+
+    return Ok(number);
+}
+
+fn parse_character(value: &Option<regex::Match>) -> std::result::Result<char, Box<dyn std::error::Error>> {
+    let value_string = value.ok_or("missing character capture")?.as_str();
+    let character: char = value_string.chars().next().ok_or("missing character")?;
+
+    return Ok(character);
+}
+
+fn parse_string(value: &Option<regex::Match>) -> std::result::Result<String, Box<dyn std::error::Error>> {
+    let value_string = value.ok_or("missing string capture")?.as_str();
+    return Ok(String::from(value_string));
+}
+
+fn parse_password(line: &str) -> std::result::Result<Password, Box<dyn std::error::Error>> {
+    let captures = PASSWORD_REGEX.captures(line).ok_or("line is not in correct format")?;
+    return Ok(Password  {
         policy: Policy {
-            letter: captures.name("letter").unwrap().as_str().chars().next().unwrap(),
-            first_position: parse_number(&captures.name("min")),
-            second_position: parse_number(&captures.name("max"))
+            letter: parse_character(&captures.name("letter"))?,
+            first_position: parse_number(&captures.name("min"))?,
+            second_position: parse_number(&captures.name("max"))?
         },
-        value: String::from(captures.name("value").unwrap().as_str()),
-    }).unwrap();
+        value: parse_string(&captures.name("value"))?
+    });
 }
 
 fn parse_line(line: std::io::Result<String>, file_name: String) -> Password {
-    return match line {
+    let value = match line {
         Err(why) => panic!("Couldn't read line from {}: {}", file_name, why),
         Ok(line) => parse_password(line.as_str())
+    };
+
+    return match value {
+        Err(why) => panic!("Couldn't parse password: {}", why),
+        Ok(password) => password
     };
 }
 

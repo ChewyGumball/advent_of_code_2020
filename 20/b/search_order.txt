@@ -1,0 +1,28 @@
+1951 (vertical flip) at (0,0)
+2311 (vertical flip) at (1,0)
+3079 (regular) at (2,0)
+2729 (vertical flip) at (0,1)
+1427 (vertical flip) at (1,1)
+2473 (vertical flip, 270 rotation) at (2,1)
+2971 (vertical flip) at (0,2)
+1489 (vertical flip) at (1,2)
+1171 (horizontal flip) at (2,2)
+
+
+Bottom 1951 (vertical flip): 2729 (vertical flip)
+Bottom 2729 (vertical flip): 2971 (vertical flip)
+
+Bottom 2311 (vertical flip): 1427 (vertical flip)
+Bottom 1427 (vertical flip): 1489 (vertical flip)
+
+Bottom 3079 (regular): 2473 (vertical flip, 270 rotation)
+Bottom 2473 (vertical flip, 270 rotation): 1171 (horizontal flip)
+
+Right 1951 (vertical flip): 2311 (vertical flip)
+Right 2311 (vertical flip): 3079 (regular)
+
+Right 2729 (vertical flip): 1427 (vertical flip)
+Right 1427 (vertical flip): 2473 (vertical flip, 270 rotation)
+
+Right 2971 (vertical flip): 1489 (vertical flip)
+Right 1489 (vertical flip): 1171 (horizontal flip)
